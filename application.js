@@ -33,6 +33,16 @@ app.use('/heartbeat', function(req, res) {
         version: packageInfo.version
     });
 });
+app.use('/download', function(req, res) {
+    res.sendFile('/SampleDoc.pdf', {
+        root: __dirname,
+        dotfiles: 'deny',
+        headers: {
+            'x-timestamp': Date.now(),
+            'x-sent': true
+        }
+    });
+});
 // fhlint-end
 
 // Important that this is last!
