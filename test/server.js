@@ -30,7 +30,7 @@ exports.after = function(finish) {
   console.log('global after');
   mbaasApi.db({
     "act": "close"
-  }, function() {
+  }, function(err) {
     if (server) {
       server.close(function() {
         return finish();

@@ -1,13 +1,15 @@
-var mbaasApi = require('fh-mbaas-api');
-var express = require('express');
-var mbaasExpress = mbaasApi.mbaasExpress();
-var cors = require('cors');
+var mbaasApi = require('fh-mbaas-api'),
+    express = require('express'),
+    mbaasExpress = mbaasApi.mbaasExpress(),
+    cors = require('cors'),
+    Logger = require(__dirname + '/lib/logger').getLogger(),
+    packageInfo = require('./package.json'),
 
-// list the endpoints which you want to make securable here
-var securableEndpoints;
-securableEndpoints = ['/hello'];
+    // fhlint-begin: securable-endpoints
+    securableEndpoints = ['/hello'],
+    // fhlint-end
 
-var app = express();
+    app = express();
 
 // Enable CORS for all requests
 app.use(cors());
@@ -22,13 +24,23 @@ app.use(express.static(__dirname + '/public'));
 // Note: important that this is added just before your own Routes
 app.use(mbaasExpress.fhmiddleware());
 
+// fhlint-begin: custom-routes
 app.use('/hello', require('./lib/hello.js')());
+// Heartbeat endpoint for connectivity check
+app.use('/heartbeat', function(req, res) {
+    res.send({
+        status: 'ok',
+        version: packageInfo.version
+    });
+});
+// fhlint-end
 
 // Important that this is last!
 app.use(mbaasExpress.errorHandler());
 
-var port = process.env.FH_PORT || process.env.OPENSHIFT_NODEJS_PORT || 8001;
-var host = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
+var port = process.env.FH_PORT || process.env.OPENSHIFT_NODEJS_PORT || 8001,
+    host = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
+
 app.listen(port, host, function() {
-  console.log("App started at: " + new Date() + " on port: " + port); 
+    Logger.info("App started at: " + new Date() + " on port: " + port);
 });
